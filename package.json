@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/benjamij/speakeasy-api#readme",
   "dependencies": {
-    "express": "^4.16.4"
+    "axios": "^0.18.0",
+    "express": "^4.16.4",
+    "jsrsasign": "^8.0.12"
   }
 }
