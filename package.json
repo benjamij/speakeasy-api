@@ -1,0 +1,24 @@
+{
+  "name": "speakeasy-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benjamij/speakeasy-api.git"
+  },
+  "author": "42ndStreet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/benjamij/speakeasy-api/issues"
+  },
+  "homepage": "https://github.com/benjamij/speakeasy-api#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "express": "^4.16.4",
+    "jsrsasign": "^8.0.12"
+  }
+}
