@@ -36,7 +36,8 @@ module.exports = new function () {
     };
 
     this._generateToken = () => {
-        const creds = require('../../../key.json');
+        const keyFile = process.env.JSON_KEY || '../../../key.json';
+        const creds = require(keyFile);
         const header = {
             alg: 'RS256',
             typ: 'JWT',
