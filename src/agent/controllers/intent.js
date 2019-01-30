@@ -1,8 +1,9 @@
 const express = require('express');
 const dialogflow = new require('../helpers/dialogflow');
+const validators = require('../validators/intent');
 const router = express.Router();
 
-router.post('/detect', function (req, res) {
+router.post('/detect', validators.detectValidators, (req, res) => {
     const creds = dialogflow.connect(req.body.session, req.body.agent);
     let response = dialogflow.detectIntent(creds, req.body.text, req.body.language);
     response.then((data) => {
