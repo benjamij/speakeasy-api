@@ -14,4 +14,5 @@ router.use('/intent', intent);
 
 app.use('/api/v1', router);
 
-app.listen(port, () => console.log(`SpeakEasy API is listening on port ${port}!`))
+const server = app.listen(port, () => console.log(`SpeakEasy API is listening on port ${port}!`))
+module.exports = server;
