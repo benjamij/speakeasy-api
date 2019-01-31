@@ -3,34 +3,32 @@ const KJUR = require('jsrsasign');
 
 module.exports = new function () {
     _token: null,
-    this.connect = () => {
+    this.connect = (session, agentName) => {
         axios.defaults.baseURL = 'https://dialogflow.googleapis.com/';
         axios.defaults.headers.post['Content-Type'] = 'application/json';
 
-        // Generate random session ID.
-        this._sessionId = Math.floor(Math.random() * 10000) + Math.floor(Date.now() / 1000);
-
-        // Generate access token.
-        this._token = this._generateToken();
+        if (!session) {
+            // Generate random session ID to start a new session.
+            const sessionId = Math.floor(Math.random() * 10000) + Math.floor(Date.now() / 1000);
+            session = `projects/${agentName}/agent/sessions/${sessionId}`;
+        } 
+        return {token: this._generateToken(), session: session};
     };
 
-    this.detectIntent = async (agentName, text, languageCode = 'en-US') => {
-        if (!this._token) {
-            throw Exception('No token generated. You must connect to Dialogflow first.');
+    this.detectIntent = async (creds, text, languageCode = 'en-US') => {
+        if (!creds.token || !creds.session) {
+            throw Exception('No token or session ID generated. You must connect to Dialogflow first.');
         }
-
-        const session = `projects/${agentName}/agent/sessions/${this._sessionId}`;
         
-        axios.defaults.headers.common['Authorization'] = `Bearer ${this._token}`;
         const response = await axios
-            .post(`/v2/${session}:detectIntent`, {
+            .post(`/v2/${creds.session}:detectIntent`, {
                 queryInput: {
                     text: {
                         text,
                         languageCode
                     }
                 }
-            })
+            }, {headers: { 'Authorization': `Bearer ${creds.token}`}})
             .catch(error => console.log(error));
         return response.data;
     };
