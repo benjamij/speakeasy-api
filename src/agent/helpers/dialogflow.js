@@ -1,9 +1,11 @@
 const axios = require('axios');
 const KJUR = require('jsrsasign');
+const ServiceAccount = require('../../auth/models/serviceAccount');
+const Organisation = require('../../auth/models/organisation');
 
 module.exports = new function () {
     _token: null,
-    this.connect = (session, agentName) => {
+    this.connect = (session, agentName, apiKey) => {
         axios.defaults.baseURL = 'https://dialogflow.googleapis.com/';
         axios.defaults.headers.post['Content-Type'] = 'application/json';
 
@@ -11,8 +13,16 @@ module.exports = new function () {
             // Generate random session ID to start a new session.
             const sessionId = Math.floor(Math.random() * 10000) + Math.floor(Date.now() / 1000);
             session = `projects/${agentName}/agent/sessions/${sessionId}`;
-        } 
-        return {token: this._generateToken(), session: session};
+        }
+
+        return Organisation.findOne({where: {api_key: apiKey}}).then((organisation) => {
+            const promise = this._generateToken(organisation.get('id'), agentName);
+            return promise.then((token) => {
+                return {token: token, session: session};
+            });
+        }).catch((error) => {
+            console.log(error);
+        });;
     };
 
     this.detectIntent = async (creds, text, languageCode = 'en-US') => {
@@ -33,25 +43,28 @@ module.exports = new function () {
         return response.data;
     };
 
-    this._generateToken = () => {
-        const keyFile = process.env.JSON_KEY || '../../../key.json';
-        const creds = require(keyFile);
-        const header = {
-            alg: 'RS256',
-            typ: 'JWT',
-            kid: creds.private_key_id
-        }
-  
-        const payload = {
-            iss: creds.client_email,
-            sub: creds.client_email,
-            iat: KJUR.jws.IntDate.get('now'),
-            exp: KJUR.jws.IntDate.get('now + 1hour'),
-            aud: 'https://dialogflow.googleapis.com/google.cloud.dialogflow.v2.Sessions'
-        }
-
-        return KJUR.jws.JWS.sign(
-            'RS256', JSON.stringify(header), JSON.stringify(payload), creds.private_key
-        )
+    this._generateToken = (organisationId, agentName) => {
+        const condition = {organisation_id: organisationId, project_id: agentName};
+        return ServiceAccount.findOne({where: condition}).then((creds) => {
+            const header = {
+                alg: 'RS256',
+                typ: 'JWT',
+                kid: creds.get('private_key_id')
+            };
+    
+            const payload = {
+                iss: creds.get('client_email'),
+                sub: creds.get('client_email'),
+                iat: KJUR.jws.IntDate.get('now'),
+                exp: KJUR.jws.IntDate.get('now + 1hour'),
+                aud: 'https://dialogflow.googleapis.com/google.cloud.dialogflow.v2.Sessions'
+            };
+            console.log(creds.get('private_key'));
+            return KJUR.jws.JWS.sign(
+                'RS256', JSON.stringify(header), JSON.stringify(payload), creds.get('private_key').trim()
+            );
+        }).catch((error) => {
+            console.log(error);
+        });
     }
 };

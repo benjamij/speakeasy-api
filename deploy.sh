@@ -19,7 +19,7 @@ done
 
 # Defining Target repository
 if [ "$target" == "production" ]; then
-    apiRepository="speakeasy-backend"
+    apiRepository="speakeasybot-api"
 else
     exit;
 fi
