@@ -2,7 +2,8 @@ const db = require('../../core/db/db')
 const Sequelize = require('sequelize');
 
 const ServiceAccount = db.sequelize.define('serviceAccount', {
-    organisation_id: Sequelize.INTEGER,
+    uuid: Sequelize.STRING,
+    agent_id: Sequelize.INTEGER,
     project_id: Sequelize.STRING,
     private_key_id: Sequelize.STRING,
     private_key: Sequelize.TEXT,
@@ -13,7 +14,6 @@ const ServiceAccount = db.sequelize.define('serviceAccount', {
     auth_provider_x509_cert_url: Sequelize.STRING,
     client_x509_cert_url: Sequelize.STRING,
     type: Sequelize.STRING,
-
 });
 
 

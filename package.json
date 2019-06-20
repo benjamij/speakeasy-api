@@ -25,7 +25,8 @@
     "jsrsasign": "^8.0.12",
     "mysql": "^2.17.1",
     "mysql2": "^1.6.5",
-    "sequelize": "^5.8.7"
+    "sequelize": "^5.8.7",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "mocha": "^5.2.0",
