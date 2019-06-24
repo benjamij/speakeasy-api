@@ -17,9 +17,9 @@ router.post('/detect', validators.detectValidators, (req, res) => {
             response.then((data) => {
                 data.session = creds.session;
                 persist_if_required(agent, 'client', 'agent', data, req);
-                res.send(data);
+                res.formatter.ok(data);
             });
-            response.catch((error) => res.send({'errors': ['Request could not be processed.']}));
+            response.catch((error) => res.formatter.badRequest(['Request could not be processed.']));
         });
     });
 

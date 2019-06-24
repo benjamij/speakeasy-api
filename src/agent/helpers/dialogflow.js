@@ -1,7 +1,6 @@
 const axios = require('axios');
 const KJUR = require('jsrsasign');
 const ServiceAccount = require('../../auth/models/serviceAccount');
-const Agent = require('..//models/agent');
 
 module.exports = new function () {
     _token: null,
