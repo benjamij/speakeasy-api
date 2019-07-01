@@ -1,11 +1,10 @@
 const axios = require('axios');
 const KJUR = require('jsrsasign');
 const ServiceAccount = require('../../auth/models/serviceAccount');
-const Organisation = require('../../auth/models/organisation');
 
 module.exports = new function () {
     _token: null,
-    this.connect = (session, agentName, apiKey) => {
+    this.connect = (session, agentName, agentId) => {
         axios.defaults.baseURL = 'https://dialogflow.googleapis.com/';
         axios.defaults.headers.post['Content-Type'] = 'application/json';
 
@@ -15,14 +14,10 @@ module.exports = new function () {
             session = `projects/${agentName}/agent/sessions/${sessionId}`;
         }
 
-        return Organisation.findOne({where: {api_key: apiKey}}).then((organisation) => {
-            const promise = this._generateToken(organisation.get('id'), agentName);
-            return promise.then((token) => {
-                return {token: token, session: session};
-            });
-        }).catch((error) => {
-            console.log(error);
-        });;
+        const promise = this._generateToken(agentId, agentName);
+        return promise.then((token) => {
+            return {token: token, session: session};
+        });
     };
 
     this.detectIntent = async (creds, text, languageCode = 'en-US') => {
@@ -43,8 +38,8 @@ module.exports = new function () {
         return response.data;
     };
 
-    this._generateToken = (organisationId, agentName) => {
-        const condition = {organisation_id: organisationId, project_id: agentName};
+    this._generateToken = (agentId, agentName) => {
+        const condition = {agent_id: agentId, project_id: agentName};
         return ServiceAccount.findOne({where: condition}).then((creds) => {
             const header = {
                 alg: 'RS256',
@@ -59,7 +54,6 @@ module.exports = new function () {
                 exp: KJUR.jws.IntDate.get('now + 1hour'),
                 aud: 'https://dialogflow.googleapis.com/google.cloud.dialogflow.v2.Sessions'
             };
-            console.log(creds.get('private_key'));
             return KJUR.jws.JWS.sign(
                 'RS256', JSON.stringify(header), JSON.stringify(payload), creds.get('private_key').trim()
             );
