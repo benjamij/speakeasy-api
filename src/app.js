@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config();
 
 const express = require('express');
 const passport = require('passport');
@@ -15,6 +15,8 @@ const authHelper = require('./auth/helpers/auth');
 passport.use(authHelper.strategy);
 
 const app = express();
+const http = require('http').createServer(app);
+
 const port = process.env.PORT || 3000;
 
 var router = express.Router();
@@ -29,5 +31,11 @@ router.use('/auth', auth);
 
 app.use('/api/v1', router);
 
-const server = app.listen(port, () => console.log(`SpeakEasy API is listening on port ${port}!`))
-module.exports = server;
+const server = app.listen(port, () => console.log(`SpeakEasy API is listening on port ${port}!`));
+
+server.broadcast = (channel, msg) => io.emit(channel, msg);
+
+var io = require('socket.io')(http);
+http.listen(port + 1, '::1', () => console.log(`SocketIO listening on port ${port + 1}`));
+
+module.exports = server

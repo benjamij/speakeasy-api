@@ -21,4 +21,13 @@ module.exports = new function () {
         process.env.MYSQL_PASSWORD,
         config
     );
+
+    this.define = (name, schema) => {
+        const model = this.sequelize.define(name, schema);
+        model.afterCreate((_model, options, _cb) => {
+            const app = require('../../app');
+            app.broadcast(options.user.organisation_uuid + '-' + name, 'update');
+        });
+        return model;
+    }
 };
